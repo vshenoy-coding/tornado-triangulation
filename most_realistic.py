@@ -290,9 +290,9 @@ def run_single_simulation(
             + rng.normal(0.0, CAL_NOISE_STD + OUTLIER_EXTRA_NOISE, len(outlier_idx))
         )
 
-    # ------------------------------------
+    # -------------------------------------
     # First-pass calibration (all sensors)
-    # ------------------------------------
+    # -------------------------------------
     num_offsets_full = NUM_SENSORS - 1
     init_offsets = np.zeros(num_offsets_full)
     init_x = np.full(num_cal_events, np.mean(sensor_x))
@@ -325,9 +325,9 @@ def run_single_simulation(
 
     est_offsets_full, _, _, _ = unpack_params(res_full.x, NUM_SENSORS, num_cal_events)
 
-    # --------------------------
+    # ---------------------------
     # Outlier detection via RMS
-    # --------------------------
+    # ---------------------------
     residuals_flat = calibration_residuals(
         res_full.x, sensor_x, sensor_y, cal_obs, BASE_SPEED_OF_SOUND
     )
