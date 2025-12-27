@@ -1,3 +1,6 @@
+# Code may take 1 to 2 hours or more to run. 
+# Keep session active to enable automatic saving so that plots display after code is finished running.
+
 # =========================================
 # CELL 1 — Setup, Imports, Constants
 # High‑Resolution Monte‑Carlo (HR‑1)
@@ -287,9 +290,9 @@ def run_single_simulation(
             + rng.normal(0.0, CAL_NOISE_STD + OUTLIER_EXTRA_NOISE, len(outlier_idx))
         )
 
-    # -------------------------
+    # ------------------------------------
     # First-pass calibration (all sensors)
-    # -------------------------
+    # ------------------------------------
     num_offsets_full = NUM_SENSORS - 1
     init_offsets = np.zeros(num_offsets_full)
     init_x = np.full(num_cal_events, np.mean(sensor_x))
@@ -322,9 +325,9 @@ def run_single_simulation(
 
     est_offsets_full, _, _, _ = unpack_params(res_full.x, NUM_SENSORS, num_cal_events)
 
-    # -------------------------
+    # --------------------------
     # Outlier detection via RMS
-    # -------------------------
+    # --------------------------
     residuals_flat = calibration_residuals(
         res_full.x, sensor_x, sensor_y, cal_obs, BASE_SPEED_OF_SOUND
     )
@@ -341,9 +344,9 @@ def run_single_simulation(
     if len(cal_inliers) < 4:
         return FAIL_ERR, FAIL_ERR, FAIL_ERR
 
-    # -------------------------
+    # ---------------------------------------
     # Second-pass calibration (inliers only)
-    # -------------------------
+    # ---------------------------------------
     sx_in = sensor_x[cal_inliers]
     sy_in = sensor_y[cal_inliers]
     obs_in = cal_obs[:, cal_inliers]
@@ -473,9 +476,9 @@ def run_single_simulation(
 
     return err_before, err_after_all, err_after_in
 
-# =========================================
+# ==================================================
 # CELL 3 — High‑Resolution Monte‑Carlo Sweep (HR‑1)
-# =========================================
+# ==================================================
 
 Ne = len(NUM_CAL_EVENTS_GRID)
 Nc = len(CLOCK_OFFSET_STD_GRID)
@@ -678,9 +681,9 @@ plt.show()
 
 print("\nHR‑1 Monte‑Carlo sweep finished.")
 
-# =========================================
+# ===========================================
 # CELL 4 — Median‑Scenario Visualization
-# =========================================
+# ===========================================
 
 print("Running median‑scenario visualization…")
 
@@ -691,9 +694,9 @@ outlier_fraction = 0.15
 
 rng = np.random.default_rng(12345)
 
-# -----------------------------------------
+# -----------------------------------------------
 # Run a single simulation but with extra outputs
-# -----------------------------------------
+# -----------------------------------------------
 
 def run_single_simulation_with_outputs(
     num_cal_events,
@@ -924,6 +927,27 @@ def run_single_simulation_with_outputs(
 )
 
 # -----------------------------------------
+# Print tornado locations and errors
+# -----------------------------------------
+
+def dist(a, b):
+    return np.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+
+print("\n=== Tornado Localization Results ===")
+print(f"True tornado location:        ({true_tx:.2f}, {true_ty:.2f})")
+
+print(f"Before calibration estimate:   ({xb:.2f}, {yb:.2f})"
+      f"   Error = {dist((xb, yb), (true_tx, true_ty)):.2f} m")
+
+print(f"After calibration (all):       ({xa:.2f}, {ya:.2f})"
+      f"   Error = {dist((xa, ya), (true_tx, true_ty)):.2f} m")
+
+print(f"After calibration (inliers):   ({xi:.2f}, {yi:.2f})"
+      f"   Error = {dist((xi, yi), (true_tx, true_ty)):.2f} m")
+
+print("====================================\n")
+
+# -----------------------------------------
 # Plotting
 # -----------------------------------------
 
@@ -1028,9 +1052,9 @@ plt.show()
 
 print("Additional visualizations complete.")
 
-# =========================================
+# ===========================================
 # CELL 6 — 3D Scatter Plot of All MC Results
-# =========================================
+# ===========================================
 
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -1086,9 +1110,9 @@ plt.show()
 
 print("3D scatter plot complete.")
 
-# =========================================
+# ============================================
 # CELL 7 — Pareto Frontier (Cost vs Accuracy)
-# =========================================
+# ============================================
 
 print("Generating Pareto frontier plots…")
 
@@ -1120,9 +1144,9 @@ def compute_pareto_frontier(costs, errors):
     return np.array(pareto_costs), np.array(pareto_errors)
 
 
-# ---------------------------------------------------------
+# ------------------------------------------------------------
 # Compute Pareto frontiers for each (clock_std, outlier_frac)
-# ---------------------------------------------------------
+# ------------------------------------------------------------
 
 plt.figure(figsize=(12,8))
 
@@ -1150,9 +1174,9 @@ plt.show()
 
 print("Pareto frontier plots complete.")
 
-# =========================================
+# =============================================
 # CELL 8 — Sensitivity Analysis (Main Effects)
-# =========================================
+# =============================================
 
 print("Generating sensitivity analysis…")
 
@@ -1224,3 +1248,7 @@ plt.tight_layout()
 plt.show()
 
 print("Sensitivity analysis complete.")
+
+# Errors for the inliers after calibration are greater than before calibration because
+# calibration can introduce small systematic biases and/or reduce geometric coverage,
+# and the tornado solver is more sensitive to bias than to raw noise.
